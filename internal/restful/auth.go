@@ -1,8 +1,10 @@
 package restful
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/viniferr33/img-processor/internal/constants"
 	"github.com/viniferr33/img-processor/internal/jwt"
 	"github.com/viniferr33/img-processor/internal/user"
 	"github.com/viniferr33/img-processor/internal/utils"
@@ -66,4 +68,29 @@ func (h *authHandler) handleUserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJsonResponse(w, http.StatusOK, TokenResponse{Token: token})
+}
+
+func (h *authHandler) AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		token, ok := utils.SplitBearerToken(authHeader)
+		if !ok {
+			http.Error(w, "Invalid Authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		claims, err := h.jwtService.ValidateToken(token)
+		if err != nil {
+			http.Error(w, "Invalid token: "+err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), constants.ContextKeyUserID, claims.Subject)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }

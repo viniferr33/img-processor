@@ -28,6 +28,14 @@ func NewRouter(authHandler *authHandler) *chi.Mux {
 			r.Post("/register", authHandler.handleUserRegistration)
 			r.Post("/login", authHandler.handleUserLogin)
 		})
+
+		// Protected routes
+		r.Group(func(r chi.Router) {
+			r.Use(authHandler.AuthMiddleware)
+
+			r.Route("/image", func(r chi.Router) {
+			})
+		})
 	})
 
 	return r

@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/viniferr33/img-processor/internal/constants"
 )
 
 func ParseJsonBody(r *http.Request, dst interface{}) error {
@@ -22,4 +24,19 @@ func WriteJsonResponse(w http.ResponseWriter, statusCode int, data interface{}) 
 		return err
 	}
 	return nil
+}
+
+func SplitBearerToken(authHeader string) (string, bool) {
+	const prefix = "Bearer "
+	if len(authHeader) > len(prefix) && authHeader[:len(prefix)] == prefix {
+		return authHeader[len(prefix):], true
+	}
+	return "", false
+}
+
+func GetUserIDFromContext(r *http.Request) (string, bool) {
+	if userID, ok := r.Context().Value(constants.ContextKeyUserID).(string); ok {
+		return userID, true
+	}
+	return "", false
 }

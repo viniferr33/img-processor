@@ -1,6 +1,10 @@
 package user
 
-import "github.com/google/uuid"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type UserService struct {
 	repo UserRepository
@@ -10,13 +14,13 @@ func NewUserService(repo UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) Register(name, email, rawPassword string) (*User, error) {
+func (s *UserService) Register(ctx context.Context, name, email, rawPassword string) (*User, error) {
 	passwordHash, err := hashPassword(rawPassword)
 	if err != nil {
 		return nil, err
 	}
 	user := NewUser(uuid.New().String(), name, email, passwordHash)
-	err = s.repo.Create(user)
+	err = s.repo.Create(ctx, user)
 
 	if err != nil {
 		return nil, err
@@ -24,8 +28,8 @@ func (s *UserService) Register(name, email, rawPassword string) (*User, error) {
 	return user, nil
 }
 
-func (s *UserService) Authenticate(email, rawPassword string) (*User, error) {
-	user, err := s.repo.GetByEmail(email)
+func (s *UserService) Authenticate(ctx context.Context, email, rawPassword string) (*User, error) {
+	user, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}

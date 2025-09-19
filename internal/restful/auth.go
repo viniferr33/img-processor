@@ -34,7 +34,7 @@ func (h *authHandler) handleUserRegistration(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user, err := h.userService.Register(reqBody.Name, reqBody.Email, reqBody.Password)
+	user, err := h.userService.Register(r.Context(), reqBody.Name, reqBody.Email, reqBody.Password)
 	if err != nil {
 		http.Error(w, "Error registering user: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -55,7 +55,7 @@ func (h *authHandler) handleUserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userService.Authenticate(reqBody.Email, reqBody.Password)
+	user, err := h.userService.Authenticate(r.Context(), reqBody.Email, reqBody.Password)
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return

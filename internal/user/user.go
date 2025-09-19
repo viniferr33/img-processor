@@ -1,6 +1,9 @@
 package user
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type User struct {
 	ID           string
@@ -12,11 +15,11 @@ type User struct {
 }
 
 type UserRepository interface {
-	GetByID(id string) (*User, error)
-	GetByEmail(email string) (*User, error)
-	Create(user *User) error
-	Update(user *User) error
-	Delete(id string) error
+	GetByID(ctx context.Context, id string) (*User, error)
+	GetByEmail(ctx context.Context, email string) (*User, error)
+	Create(ctx context.Context, user *User) error
+	Update(ctx context.Context, user *User) error
+	Delete(ctx context.Context, id string) error
 }
 
 func NewUser(id, name, email, passwordHash string) *User {

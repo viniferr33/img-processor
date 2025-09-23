@@ -24,7 +24,7 @@ func (s *JwtService) SignToken(subject string) (string, error) {
 	claims := &jwt.RegisteredClaims{
 		Issuer:    s.defaultIssuer,
 		Subject:   subject,
-		ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.expirationTime) * time.Second)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -6,6 +6,10 @@ import (
 	"image"
 	"strings"
 
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/google/uuid"
 )
 
@@ -23,8 +27,8 @@ func NewImageService(repo ImageRepository, storage ObjectStorage, defaultBucket 
 	}
 }
 
-func (s *ImageService) UploadImage(ctx context.Context, data []byte, filename, mimetype, parentId, ownerId string, version int) (*Image, error) {
-	imgWidth, imgHeight, err := GetImageMetadata(data)
+func (s *ImageService) UploadImage(ctx context.Context, data []byte, filename, parentId, ownerId string, version int) (*Image, error) {
+	imgWidth, imgHeight, mimetype, err := GetImageMetadata(data)
 	if err != nil {
 		return nil, err
 	}
@@ -56,20 +60,21 @@ func (s *ImageService) UploadImage(ctx context.Context, data []byte, filename, m
 	return image, nil
 }
 
-func GetImageMetadata(data []byte) (width, height int, err error) {
-	config, _, err := image.DecodeConfig(strings.NewReader(string(data)))
+func GetImageMetadata(data []byte) (width, height int, mimetype string, err error) {
+	config, format, err := image.DecodeConfig(strings.NewReader(string(data)))
 	if err != nil {
 		// Attempt to decode as base64 if initial decoding fails
 		decodedData, decodeErr := base64.StdEncoding.DecodeString(string(data))
 		if decodeErr != nil {
-			return 0, 0, err
+			return 0, 0, "", err
 		}
 
-		config, _, err = image.DecodeConfig(strings.NewReader(string(decodedData)))
+		config, format, err = image.DecodeConfig(strings.NewReader(string(decodedData)))
 		if err != nil {
-			return 0, 0, err
+			return 0, 0, "", err
 		}
 	}
 
-	return config.Width, config.Height, nil
+	mimetype = "image/" + format
+	return config.Width, config.Height, mimetype, nil
 }

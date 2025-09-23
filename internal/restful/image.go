@@ -44,7 +44,7 @@ func (h *imageHandler) handleUploadImage(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = h.imageService.UploadImage(r.Context(), data, handler.Filename, handler.Header.Get("Content-Type"), "", ownerId, 0)
+	_, err = h.imageService.UploadImage(r.Context(), data, handler.Filename, "", ownerId, 1)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Error uploading the image: %v", err))
 		http.Error(w, "Error uploading the image", http.StatusInternalServerError)

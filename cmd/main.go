@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/viniferr33/img-processor/internal/config"
@@ -27,15 +28,11 @@ func main() {
 	db := setupDatabase()
 	defer db.Close()
 
+	objStorage := setupObjectStorage()
+
 	// Setup Repositories
 	userRepo := postgres.NewUserRepository(db)
 	imgRepo := postgres.NewImageRepository(db)
-	objStorage := minio.NewMinIO(
-		config.MinIOEndpoint,
-		config.MinIOAccessKeyID,
-		config.MinIOSecretAccessKey,
-		config.MinIOUseSSL,
-	)
 
 	// Setup Services
 	userService := user.NewUserService(userRepo)
@@ -80,4 +77,22 @@ func setupDatabase() *sql.DB {
 	}
 
 	return db
+}
+
+func setupObjectStorage() *minio.MinIO {
+	objStorage, err := minio.NewMinIO(
+		config.MinIOEndpoint,
+		config.MinIOAccessKeyID,
+		config.MinIOSecretAccessKey,
+		config.MinIOUseSSL,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := objStorage.EnsureBucket(context.Background(), config.MinIODefaultBucket); err != nil {
+		panic(err)
+	}
+
+	return objStorage
 }

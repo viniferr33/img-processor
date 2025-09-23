@@ -26,6 +26,13 @@ var (
 	JWTSecretKey     = envOrPanic("JWT_SECRET_KEY")
 	JWTIssuer        = envOrDefault("JWT_ISSUER", "img-processor")
 	JWTExpirationSec = int64(3600) // 1 hour
+
+	// MinIO
+	MinIOEndpoint        = envOrPanic("MINIO_ENDPOINT")
+	MinIOAccessKeyID     = envOrPanic("MINIO_ACCESS_KEY_ID")
+	MinIOSecretAccessKey = envOrPanic("MINIO_SECRET_ACCESS_KEY")
+	MinIOUseSSL          = envOrDefault("MINIO_USE_SSL", "false") == "true"
+	MinIODefaultBucket   = envOrDefault("MINIO_DEFAULT_BUCKET", "images")
 )
 
 func envOrPanic(key string) string {

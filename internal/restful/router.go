@@ -9,7 +9,7 @@ import (
 	"github.com/viniferr33/img-processor/pkg/logger"
 )
 
-func NewRouter(authHandler *authHandler) *chi.Mux {
+func NewRouter(authHandler *authHandler, imageHandler *imageHandler) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -34,6 +34,7 @@ func NewRouter(authHandler *authHandler) *chi.Mux {
 			r.Use(authHandler.AuthMiddleware)
 
 			r.Route("/image", func(r chi.Router) {
+				r.Post("/upload", imageHandler.handleUploadImage)
 			})
 		})
 	})

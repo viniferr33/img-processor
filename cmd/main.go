@@ -4,12 +4,14 @@ import (
 	"database/sql"
 
 	"github.com/viniferr33/img-processor/internal/config"
+	"github.com/viniferr33/img-processor/internal/image"
 	"github.com/viniferr33/img-processor/internal/jwt"
 	"github.com/viniferr33/img-processor/internal/postgres"
 	"github.com/viniferr33/img-processor/internal/restful"
 	"github.com/viniferr33/img-processor/internal/user"
 	"github.com/viniferr33/img-processor/pkg/database"
 	"github.com/viniferr33/img-processor/pkg/logger"
+	"github.com/viniferr33/img-processor/pkg/minio"
 	"github.com/viniferr33/img-processor/pkg/server"
 )
 
@@ -27,6 +29,13 @@ func main() {
 
 	// Setup Repositories
 	userRepo := postgres.NewUserRepository(db)
+	imgRepo := postgres.NewImageRepository(db)
+	objStorage := minio.NewMinIO(
+		config.MinIOEndpoint,
+		config.MinIOAccessKeyID,
+		config.MinIOSecretAccessKey,
+		config.MinIOUseSSL,
+	)
 
 	// Setup Services
 	userService := user.NewUserService(userRepo)
@@ -36,11 +45,14 @@ func main() {
 		config.JWTExpirationSec,
 	)
 
+	imgService := image.NewImageService(imgRepo, objStorage, config.MinIODefaultBucket)
+
 	// Setup Handlers
 	authHandler := restful.NewAuthHandler(*userService, *jwtService)
+	imageHandler := restful.NewImageHandler(*imgService)
 
 	// Setup and start the HTTP server
-	router := restful.NewRouter(authHandler)
+	router := restful.NewRouter(authHandler, imageHandler)
 	server.Init(server.Config{
 		Host:    config.ServerHost,
 		Port:    config.ServerPort,

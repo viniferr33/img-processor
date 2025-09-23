@@ -1,6 +1,9 @@
 package image
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type Image struct {
 	ID           string
@@ -11,6 +14,7 @@ type Image struct {
 	Height       int
 	ParentID     string
 	Version      int
+	OwnerID      string
 	CreatedAt    int64
 	UpdatedAt    int64
 
@@ -31,7 +35,7 @@ type ObjectStorage interface {
 	Delete(ctx context.Context, bucketName, objectKey string) error
 }
 
-func NewImage(id, originalName string, size int64, mimeType string, width, height int, parentID string, version int, bucketName, objectKey string) *Image {
+func NewImage(id, originalName string, size int64, mimeType string, width, height int, parentID string, version int, bucketName, objectKey, ownerID string) *Image {
 	return &Image{
 		ID:           id,
 		OriginalName: originalName,
@@ -43,5 +47,8 @@ func NewImage(id, originalName string, size int64, mimeType string, width, heigh
 		Version:      version,
 		BucketName:   bucketName,
 		ObjectKey:    objectKey,
+		OwnerID:      ownerID,
+		CreatedAt:    time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
 	}
 }

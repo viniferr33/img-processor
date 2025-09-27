@@ -23,7 +23,7 @@ func NewAuthHandler(userService user.UserService, jwtService jwt.JwtService) *au
 }
 
 func (h *authHandler) handleUserRegistration(w http.ResponseWriter, r *http.Request) {
-	var reqBody UserRegistrationRequest
+	var reqBody user.UserRegistrationRequest
 	if err := utils.ParseJsonBody(r, &reqBody); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -34,7 +34,7 @@ func (h *authHandler) handleUserRegistration(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user, err := h.userService.Register(r.Context(), reqBody.Name, reqBody.Email, reqBody.Password)
+	user, err := h.userService.Register(r.Context(), reqBody)
 	if err != nil {
 		http.Error(w, "Error registering user: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -44,7 +44,7 @@ func (h *authHandler) handleUserRegistration(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *authHandler) handleUserLogin(w http.ResponseWriter, r *http.Request) {
-	var reqBody UserLoginRequest
+	var reqBody user.UserLoginRequest
 	if err := utils.ParseJsonBody(r, &reqBody); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -55,7 +55,7 @@ func (h *authHandler) handleUserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userService.Authenticate(r.Context(), reqBody.Email, reqBody.Password)
+	user, err := h.userService.Authenticate(r.Context(), reqBody)
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return

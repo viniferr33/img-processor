@@ -1,4 +1,4 @@
-package restful
+package user
 
 type UserRegistrationRequest struct {
 	Name     string `json:"name"`
